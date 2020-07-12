@@ -1,0 +1,27 @@
+version: "3.4"
+
+services:
+  mongo1:
+    container_name: mongo1
+    image: mongo:4.2.8-bionic
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - 27017:27017
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongo",
+          "admin",
+          "-u",
+          "root",
+          "-p",
+          "password",
+          "--eval",
+          'rs.initiate( { _id : "rs0",members: [{ _id: 0,host: "mongo1:27017" }]}) ; db.getSiblingDB("admin").grantRolesToUser("root",[ "clusterAdmin" ]);',
+        ]
+      interval: 10s
+      start_period: 15s
+    command: ["--replSet", "rs0", "--bind_ip_all", "--auth"]
